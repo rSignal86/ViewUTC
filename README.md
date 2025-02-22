@@ -14,7 +14,7 @@ Supports both day and night modes for radio band conditions.
 Download the ViewUTC.html file by clicking this link https://github.com/rSignal86/ViewUTC/blob/main/ViewUTC.html
 Place the file on your desktop or in a desired folder.
 Double-click the file to open it in your browser.
-The magic happens automatically – real-time data is loaded and displayed in a simple dashboard!
+The magic happens automatically – (Almost)real-time data is loaded and displayed in a simple dashboard while you can the ham licensed wizard in the sky! 
 
 # Future development requirements
 All future versions, whether created by the original author LB6QJ or contributors on github or any other platforms, must be contained within a single file. This ensures ease of use for all users when downloading new versions and maintains platform independence across Windows, Mac, and Linux.
