@@ -1,4 +1,4 @@
-# ViewUTC - Simple Dashboard for Relevant Data
+# ViewUTC - Simple HTML Dashboard for radioamateurs
 
 # About the Project
 ViewUTC is a lightweight, local HTML application that displays relevant data from various sources directly in your browser. No installation is required – just double-click the HTML file to start.
