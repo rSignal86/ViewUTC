@@ -11,7 +11,7 @@ No data is stored or transmitted – the program only fetches information for di
 Supports both day and night modes for radio band conditions.
 
 # How to Use
-Download the ViewUTC.html file.
+Download the ViewUTC.html file by clicking this link https://github.com/rSignal86/ViewUTC/blob/main/ViewUTC.html
 Place the file on your desktop or in a desired folder.
 Double-click the file to open it in your browser.
 The magic happens automatically – real-time data is loaded and displayed in a simple dashboard!
