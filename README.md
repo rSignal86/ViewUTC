@@ -16,15 +16,18 @@ Place the file on your desktop or in a desired folder.
 Double-click the file to open it in your browser.
 The magic happens automatically – real-time data is loaded and displayed in a simple dashboard!
 
+# Future development requirements
+All future versions, whether created by the original author LB6QJ or contributors on github or any other platforms, must be contained within a single file. This ensures ease of use for all users when downloading new versions and maintains platform independence across Windows, Mac, and Linux.
+
+# Updates
+For the latest version, check out https://github.com/rSignal86/ViewUTC. Update the file by downloading the latest ViewUTC.html, it os recommended that the files is stored to you desk to for easy accses. Delete the old file og just replace it if you get any message.
+
 # Technical Information
 Built with HTML, CSS, and JavaScript (no server required).
 Data is fetched from open APIs like NOAA for geophysical and solar conditions.
 Requires an internet connection to retrieve updated data.
 
-# Updates
-For the latest version, check out https://github.com/rSignal86/ViewUTC. Update the file by downloading the latest ViewUTC.html, it os recommended that the files is stored to you desk to for easy accses. Delete the old file og just replace it if you get any message.
-
-License
+# License
 This project is open and free to use. Contributions and improvements are welcome!
 
 73 de LB6QJ 🚀
