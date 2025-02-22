@@ -20,7 +20,7 @@ The magic happens automatically – (Almost)real-time data is loaded and display
 All future versions, whether created by the original author LB6QJ or contributors on github or any other platforms, must be contained within a single file. This ensures ease of use for all users when downloading new versions and maintains platform independence across Windows, Mac, and Linux.
 
 # Updates
-For the latest version, check out https://github.com/rSignal86/ViewUTC. Update the file by downloading the latest ViewUTC.html, it os recommended that the files is stored to you desk to for easy accses. Delete the old file og just replace it if you get any message.
+For the latest version, check out https://github.com/rSignal86/ViewUTC. Update the file by downloading the latest ViewUTC.html, it is recommended that the file is stored to you desktop to for easy accses. Delete the old file og just replace it if you get any message.
 
 # Technical Information
 Built with HTML, CSS, and JavaScript (no server required).
