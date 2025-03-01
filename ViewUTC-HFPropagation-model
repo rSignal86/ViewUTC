@@ -1,0 +1,53 @@
+# ViewUTC-HFPropagation-model Documentation
+
+## Model Overview
+This propagation model is developed to provide a realistic assessment of HF band conditions (160m–10m) based on real-time data from the NOAA Space Weather Prediction Center. 
+The model combines four key parameters – Solar Flux Index (SFI), Sunspot Number (SSN), Kp Index, and A Index – along with a day/night check based on UTC time.
+It is designed to balance the positive effects of solar activity (high SFI/SSN) against geomagnetic disturbances (high Kp/A) and considers the varying sensitivity of different bands to these factors. 
+The results are classified as **"Good," "Fair," or "Poor"**, aligned with the visual style of the ViewUTC dashboard.
+It groups **160m/80m and 40m/30m** together due to their similar behavior under certain conditions, while **20m, 15m, and 10m** are treated individually to reflect their unique solar activity and stability requirements.
+
+## Values and Band-Specific Calculations
+The model is based on the following parameters:
+- **SFI (Solar Flux Index):** Measures solar radiation at 10.7 cm (higher = better ionization, especially for higher bands).
+- **SSN (Sunspot Number):** Number of sunspots, correlates with ionospheric ionization.
+- **Kp Index:** Geomagnetic activity on a 3-hour scale (0–9, higher = more disturbance).
+- **A Index:** Daily geomagnetic stability (0–400, higher = more disruption).
+- **Day/Night Check:** Verifies whether UTC time is 06:00–18:00 (daytime increases D-layer absorption but benefits higher bands).
+
+### Band Calculations
+
+#### **160m/80m (1.8/3.5 MHz)**
+- **Good:** Kp ≤ 2 and A ≤ 7 (calm conditions required due to high noise sensitivity).
+- **Fair:** Kp ≤ 4 and A ≤ 15 (tolerates some disturbance but not extreme).
+- **Poor:** Otherwise (high Kp/A causes noise, worsened by daytime absorption).
+
+#### **40m/30m (7/10.1 MHz)**
+- **Good:** SFI > 80, SSN > 20, Kp ≤ 3, A ≤ 10 (requires moderate solar activity and stability).
+- **Fair:** SFI > 60, Kp ≤ 5 (works under lower activity, tolerates some disturbance).
+- **Poor:** Otherwise (too low SFI or high disturbance closes the bands).
+
+#### **20m (14 MHz)**
+- **Good:** SFI > 100, SSN > 40, Kp ≤ 2, A ≤ 7 (requires strong solar activity and calm conditions).
+- **Fair:** SFI > 70, Kp ≤ 4 (a robust band, tolerates some disturbance).
+- **Poor:** Otherwise (insufficient solar activity or high disturbance).
+
+#### **15m (21 MHz)**
+- **Good:** SFI > 120, SSN > 60, Kp ≤ 2, A ≤ 7, daytime (high solar activity and stability, daytime helps).
+- **Fair:** SFI > 90, Kp ≤ 4 (open, but not optimal).
+- **Poor:** Otherwise (too little solar activity or too much disturbance).
+
+#### **10m (28 MHz)**
+- **Good:** SFI > 140, SSN > 80, Kp ≤ 2, A ≤ 7, daytime (requires strong solar activity and stability).
+- **Fair:** SFI > 110, Kp ≤ 4 (usable under moderate activity, tolerates some disturbance).
+- **Poor:** Otherwise (closes under low activity or high disturbance).
+
+## Calculation Method
+Calculations prioritize **Kp from `wwv.txt`** for accuracy, with fallback to `3-day-geomag-forecast.txt`. 
+Thresholds are adjusted based on amateur radio practices and validation against actual conditions, for example, **Kp = 4 results in "Fair" on 10m**, consistent with other models.
+
+## Sources
+The model retrieves data from the following sources:
+- [NOAA WWV Data](https://services.swpc.noaa.gov/text/wwv.txt)
+- [3-day Geomagnetic Forecast](https://services.swpc.noaa.gov/text/3-day-geomag-forecast.txt)
+- [Observed Solar Cycle Index](https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json)
