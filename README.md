@@ -19,8 +19,13 @@ The magic happens automatically – (Almost)real-time data is loaded and display
 # Future development requirements
 All future versions, whether created by the original author LB6QJ or contributors on github or any other platforms, must be contained within a single file. This ensures ease of use for all users when downloading new versions and maintains platform independence across Windows, Mac, and Linux.
 
-# Updates
-For the latest version, check out https://github.com/rSignal86/ViewUTC. Update the file by downloading the latest ViewUTC.html, it is recommended that the file is stored to you desktop to for easy accses. Delete the old file og just replace it if you get any message.
+# Privacy/security and updates
+This program is only available on github and is not distributed elsewhere. This program does not upload personal data or information on your computer to me or third parties. There are only one exception, and that is that this program is doing a Github version check. This means that the program asks github once a day if there is a new version. If there is a message at the very bottom of the program that there is a new version, you can download the latest update yourself. There is no automatic update mechanism and will not be implemented due to privacy concerns. For the latest version, check out https://github.com/rSignal86/ViewUTC. Update the file by downloading the latest ViewUTC.html, it is recommended that the file is stored on your desktop to for easy accses. 
+Delete the old file og just replace it if you get any message.
+
+# people with disabilities
+I am very keen that everyone should benefit from this program, so I try to make it accessible to people with visual and hearing impairments. 
+I have included buttons that users can click to have certain values ​​read out to you. There are functions in the browser that allow you to make text to speech work with a synthetic voice, this is done with the "Web Speech API"
 
 # Technical Information
 Built with HTML, CSS, and JavaScript (no server required).
