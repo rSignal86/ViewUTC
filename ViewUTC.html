@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>V(U)iew(TC) - Version GHv2.4</title>
+  <title>V(U)iew(TC) - Version GHv2.5.1</title>
   <style>
     body {
       display: flex;
@@ -40,23 +40,23 @@
       border-radius: 8px;
       display: flex;
       flex-direction: column;
-      justify-content: center; /* Center vertically in box */
+      justify-content: center;
       align-items: center;
     }
-    #kp-speedometer { /* Adjusted Kp-index speedometer to fill canvas */
+    #kp-speedometer {
       width: 300px;
       height: 200px;
     }
-    #clock { /* Shows current UTC time */
+    #clock {
       font-size: 60px;
       font-weight: bold;
       margin: 0;
     }
-    #date { /* Shows current UTC date */
+    #date {
       font-size: 30px;
       margin: 0;
     }
-    #SFI-A-SN { /* Displays solar data and speech buttons */
+    #SFI-A-SN {
       font-size: 18px;
       text-align: left;
       line-height: 1;
@@ -66,7 +66,7 @@
       display: block;
       margin: 0;
     }
-    .band-table { /* Shows HF band conditions */
+    .band-table {
       width: 100%;
       border-collapse: collapse;
     }
@@ -90,17 +90,17 @@
       background-color: #F44336;
       color: black;
     }
-    #fullscreen-message { /* Footer with usage info */
+    #fullscreen-message {
       font-size: 14px;
       color: yellow;
       margin-top: 30px;
     }
-    #version-message { /* Message for version updates */
+    #version-message {
       font-size: 16px;
       color: #FFEB3B;
       margin-top: 10px;
     }
-    #qrz-search { /* QRZ lookup tool */
+    #qrz-search {
       width: 100%;
       display: flex;
       flex-direction: column;
@@ -129,7 +129,7 @@
     #qrz-button:hover {
       background-color: #45a049;
     }
-    #solar-image { /* Displays latest solar image */
+    #solar-image {
       max-width: 100%;
       max-height: 200px;
       border-radius: 1px;
@@ -139,14 +139,14 @@
     #solar-image.enlarged {
       max-height: 400px;
     }
-    .speak-buttons-container { /* Container for horizontal speech buttons */
+    .speak-buttons-container {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
       gap: 10px;
       margin-top: 10px;
     }
-    .speak-button { /* Generic style for speech buttons */
+    .speak-button {
       padding: 5px 10px;
       font-size: 14px;
       background-color: #1a1a1a;
@@ -204,20 +204,17 @@
 
   <script>
     const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-    const CURRENT_VERSION = "GHv2.4";
+    const CURRENT_VERSION = "GHv2.5.1";
     const GITHUB_REPO = "rSignal86/ViewUTC";
 
-    // Logs timestamp for debugging
     const getTimestamp = () => `[${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}]`;
 
-    // Updates UTC clock and date
     const updateClock = () => {
       const now = new Date();
       document.getElementById('clock').textContent = `${now.getUTCHours().toString().padStart(2, '0')}:${now.getUTCMinutes().toString().padStart(2, '0')}:${now.getUTCSeconds().toString().padStart(2, '0')}`;
       document.getElementById('date').textContent = `${now.getUTCDate().toString().padStart(2, '0')} ${monthNames[now.getUTCMonth()]} ${now.getUTCFullYear().toString().slice(-2)}`;
     };
 
-    // Fetches current Kp-index and timestamp from NOAA WWV, draws speedometer
     const fetchKpData = async () => {
       try {
         const response = await fetch(`https://services.swpc.noaa.gov/text/wwv.txt?${new Date().getTime()}`);
@@ -227,33 +224,27 @@
         const kpLine = lines.find(line => line.toLowerCase().includes("k-index"));
         const kpMatch = kpLine?.match(/K-index at (\d{4}) UTC on \d{2} \w{3}.*was\s+([\d.]+)/i);
         if (!kpMatch) throw new Error("Kp value not found in WWV data");
-
-        const time = kpMatch[1]; // e.g., "1200"
-        const kpValue = parseFloat(kpMatch[2]); // e.g., "1.67"
-
-        // Draw speedometer with Kp and time
+        const time = kpMatch[1];
+        const kpValue = parseFloat(kpMatch[2]);
         drawKpSpeedometer(kpValue, time);
         console.log(getTimestamp(), `Fetched Kp: ${kpValue} at ${time} UTC from WWV`);
         return kpValue;
       } catch (error) {
         console.error(getTimestamp(), "Error fetching Kp data:", error);
-        drawKpSpeedometer(0, "Error"); // Default to 0 on error
+        drawKpSpeedometer(0, "Error");
         return "Unknown";
       }
     };
 
-    // Draws Kp Speedometer to fill the canvas without changing proportions
     const drawKpSpeedometer = (kp, time) => {
       const canvas = document.getElementById('kp-speedometer');
       const ctx = canvas.getContext('2d');
-      const centerX = canvas.width / 2; // Centered horizontally
-      const centerY = canvas.height / 2 + 50; // Adjusted to position arc lower
-      const radius = 130; // Increased to fill the width, adjusted for height
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2 + 50;
+      const radius = 130;
 
-      // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw background arc (0-9 scale) with gradient
       const gradient = ctx.createLinearGradient(centerX - radius, centerY, centerX + radius, centerY);
       gradient.addColorStop(0, '#4CAF50');
       gradient.addColorStop(0.5, '#FFEB3B');
@@ -264,44 +255,37 @@
       ctx.strokeStyle = '#444';
       ctx.stroke();
 
-      // Draw Kp arc with gradient
-      const angle = Math.PI + (kp / 9) * Math.PI; // Scale 0-9 to 180 degrees
+      const angle = Math.PI + (kp / 9) * Math.PI;
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, Math.PI, angle, false);
       ctx.lineWidth = 20;
       ctx.strokeStyle = gradient;
       ctx.stroke();
 
-      // Draw Kp text centered above needle
       ctx.font = '30px Arial';
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
-      ctx.fillText(`Kp: ${kp}`, centerX, centerY - 60); // Adjusted to fit within arc
-
-      // Draw time text below Kp, above needle
+      ctx.fillText(`Kp: ${kp}`, centerX, centerY - 60);
       ctx.font = '14px Arial';
-      ctx.fillText(`at ${time}`, centerX, centerY - 40); // Adjusted to fit within arc
+      ctx.fillText(`at ${time}`, centerX, centerY - 40);
 
-      // Draw needle (contrasting black with white outline)
       ctx.beginPath();
       ctx.moveTo(centerX, centerY);
       ctx.lineTo(centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle));
-      ctx.lineWidth = 8; // Bolder needle
-      ctx.strokeStyle = 'black'; // Black fill for contrast
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = 'black';
       ctx.stroke();
 
-      // White outline for needle
       ctx.beginPath();
       ctx.moveTo(centerX, centerY);
       ctx.lineTo(centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle));
-      ctx.lineWidth = 12; // Slightly wider for outline
+      ctx.lineWidth = 12;
       ctx.strokeStyle = 'white';
-      ctx.globalCompositeOperation = 'destination-over'; // Draw behind
+      ctx.globalCompositeOperation = 'destination-over';
       ctx.stroke();
-      ctx.globalCompositeOperation = 'source-over'; // Reset
+      ctx.globalCompositeOperation = 'source-over';
     };
 
-    // Fetches A-index from NOAA WWV
     const fetchAIndex = async () => {
       try {
         const response = await fetch(`https://services.swpc.noaa.gov/text/wwv.txt?${new Date().getTime()}`);
@@ -319,7 +303,6 @@
       }
     };
 
-    // Fetches SFI and SSN from NOAA Daily Solar Indices
     const fetchSFIandSSN = async () => {
       try {
         const response = await fetch(`https://services.swpc.noaa.gov/text/daily-solar-indices.txt?${new Date().getTime()}`);
@@ -328,8 +311,8 @@
         const lines = text.split('\n').filter(line => line.match(/^\d{4}\s+\d{2}\s+\d{2}/));
         const latestLine = lines[lines.length - 1];
         const data = latestLine.split(/\s+/);
-        const sfi = data[3]; // Column 4: Solar Flux Index
-        const ssn = data[4]; // Column 5: Sunspot Number
+        const sfi = data[3];
+        const ssn = data[4];
         console.log(getTimestamp(), `Fetched SFI: ${sfi}, SSN: ${ssn} from daily-solar-indices`);
         return { sfi, ssn };
       } catch (error) {
@@ -338,13 +321,11 @@
       }
     };
 
-    // Calculates D-Layer Absorption based on A-index
     const calculateDLayerAbsorption = aIndex => {
       const aIndexNum = parseInt(aIndex);
       return isNaN(aIndexNum) ? "Unknown" : aIndexNum <= 10 ? "Low" : aIndexNum <= 25 ? "Moderate" : "High";
     };
 
-    // Checks GitHub for the latest version
     const checkVersion = async () => {
       try {
         const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
@@ -363,7 +344,6 @@
       }
     };
 
-    // Updates solar data and band conditions
     const updateSolarData = async () => {
       try {
         const { sfi, ssn } = await fetchSFIandSSN();
@@ -380,9 +360,9 @@
         window.currentAIndex = aIndex;
         window.currentDLayer = dLayer;
         
-        const timestamp = new Date().toUTCString();
-        console.log(`Data fetched: ${timestamp}`);
-        console.log(`Propagation calculated for SFI: ${sfi}, SSN: ${ssn}, Kp: ${kp}, A: ${aIndex}`);
+        const timestamp = getTimestamp();
+        console.log(`${timestamp} Data fetched: ${new Date().toUTCString()}`);
+        console.log(`${timestamp} Propagation calculated for SFI: ${sfi}, SSN: ${ssn}, Kp: ${kp}, A: ${aIndex}`);
         
         updateBandConditions(sfi, kp, ssn, aIndex);
       } catch (error) {
@@ -390,31 +370,26 @@
       }
     };
 
-    /* 
-      Propagation Model Overview:
-      Assesses HF band conditions (160m–10m) using real-time data: Solar Flux Index (SFI), Sunspot Number (SSN), Kp-index, and A-index, plus a day/night check (UTC 06:00–18:00). 
-      Balances solar activity (SFI/SSN) against geomagnetic disturbance (Kp/A), classifying conditions as "Good", "Fair", or "Poor". 
-      Developed with Grok3, it uses multiple parameters and nuanced thresholds. 160m/80m and 40m/30m are grouped due to similar behavior.
-
-      Values and Calculation per Band:
-      - 160m/80m (1.8/3.5 MHz): Good: Kp ≤ 2, A ≤ 7; Fair: Kp ≤ 4, A ≤ 15; Poor: else
-      - 40m/30m (7/10.1 MHz): Good: SFI > 80, SSN > 20, Kp ≤ 3, A ≤ 10; Fair: SFI > 60, Kp ≤ 5; Poor: else
-      - 20m (14 MHz): Good: SFI > 100, SSN > 40, Kp ≤ 2, A ≤ 7; Fair: SFI > 70, Kp ≤ 4; Poor: else
-      - 15m (21 MHz): Good: SFI > 120, SSN > 60, Kp ≤ 2, A ≤ 7, daytime; Fair: SFI > 90, Kp ≤ 4; Poor: else
-      - 10m (28 MHz): Good: SFI > 140, SSN > 80, Kp ≤ 2, A ≤ 7, daytime; Fair: SFI > 110, Kp ≤ 4; Poor: else
-    */
     const updateBandConditions = (sfi, kp, ssn, aIndex) => {
+      const timestamp = getTimestamp();
+      console.log(`${timestamp} Updating band conditions with SFI: ${sfi}, Kp: ${kp}, SSN: ${ssn}, A: ${aIndex}`);
+      
       const sfiNum = parseFloat(sfi);
       const kpNum = parseFloat(kp);
       const ssnNum = parseFloat(ssn);
       const aIndexNum = parseFloat(aIndex);
       const isDaytime = new Date().getUTCHours() >= 6 && new Date().getUTCHours() <= 18;
+      console.log(`${timestamp} Is daytime? ${isDaytime}`);
+      
       const conditions = { good: { text: "Good", class: "good" }, fair: { text: "Fair", class: "fair" }, poor: { text: "Poor", class: "poor" } };
       
       const setStatus = (id, status) => {
         const cell = document.getElementById(id);
         cell.textContent = status.text;
         cell.className = status.class === "good" ? "good" : status.class === "fair" ? "fair" : "poor";
+        cell.style.visibility = 'hidden';
+        setTimeout(() => cell.style.visibility = 'visible', 0);
+        console.log(`${timestamp} Set ${id} to ${status.text}`);
       };
 
       setStatus("band160-80", kpNum <= 2 && aIndexNum <= 7 ? conditions.good : kpNum <= 4 && aIndexNum <= 15 ? conditions.fair : conditions.poor);
@@ -424,24 +399,20 @@
       setStatus("band10", sfiNum > 140 && ssnNum > 80 && kpNum <= 2 && aIndexNum <= 7 && isDaytime ? conditions.good : sfiNum > 110 && kpNum <= 4 ? conditions.fair : conditions.poor);
     };
 
-    // Opens QRZ lookup in new tab
     const searchQRZ = () => {
       const callsign = document.getElementById('qrz-input').value.trim().toUpperCase();
       if (callsign) { window.open(`https://www.qrz.com/db/${callsign}`, '_blank'); console.log(getTimestamp(), `Searching QRZ for ${callsign}`); }
       else console.error(getTimestamp(), "Error: No callsign entered.");
     };
 
-    // Updates solar image with timestamp to avoid caching
-    const updateSolarImage = () => document.getElementById('solar-image').src = `https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0171.jpg?${new Date().getTime()}`;
+    const updateSolarImage = () => document.getElementById('solar-image').src = `https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0171.jpg?`;
 
-    // Toggles solar image size on click
     const toggleSolarImageSize = () => {
       const solarImage = document.getElementById('solar-image');
       solarImage.classList.toggle('enlarged');
       console.log(getTimestamp(), `Solar image size toggled: ${solarImage.classList.contains('enlarged') ? 'Enlarged' : 'Normal'}`);
     };
 
-    // Speech functions
     const speakSfi = () => {
       const sfiValue = window.currentSfi || "Unknown";
       const utterance = new SpeechSynthesisUtterance(`Solar flux as of this time is ${sfiValue}`);
@@ -482,7 +453,6 @@
       console.log(getTimestamp(), `Speaking D-Layer Absorption: ${dLayerValue}`);
     };
 
-    // Event listeners
     document.getElementById('qrz-input').addEventListener('keypress', e => e.key === 'Enter' && searchQRZ());
     document.getElementById('solar-image').addEventListener('click', toggleSolarImageSize);
     document.getElementById('speak-sfi-button').addEventListener('click', speakSfi);
@@ -491,59 +461,14 @@
     document.getElementById('speak-kp-button').addEventListener('click', speakKpIndex);
     document.getElementById('speak-d-layer-button').addEventListener('click', speakDLayer);
 
-    // Set intervals for updates and initial calls
     setInterval(updateClock, 1000);
-    setInterval(updateSolarData, 3600000); // Updates every hour
-    setInterval(updateSolarImage, 900000); // Updates every 15 minutes
-    setInterval(checkVersion, 86400000); // Checks version every 24 hours
+    setInterval(updateSolarData, 3600000);
+    setInterval(updateSolarImage, 900000);
+    setInterval(checkVersion, 86400000);
     updateClock();
     updateSolarData();
     updateSolarImage();
     checkVersion();
   </script>
-  <!-- 
-    Project Overview:
-    This dashboard, V(U)iew(TC), is a collaborative effort between ChatGPT, DeepSeek, and Grok3 (created by xAI), led by radio amateur LB6QJ. Designed for ham radio enthusiasts, it provides real-time solar and geomagnetic data to assess HF band conditions, featuring a Kp-index speedometer.
-
-    Techniques and Languages Used:
-    - HTML5: Structures the dashboard layout, including the Canvas element used for the Kp speedometer. Canvas is an HTML5 feature that provides a dynamic, scriptable rendering surface for creating graphics, animations, and interactive content directly within the browser using JavaScript. In this project, it serves as a real-time drawing area where the speedometer's arc, needle, and text are rendered based on live data from NOAA SWPC WWV, offering a customizable and responsive visual representation that updates hourly.
-    - CSS3: Styles the interface with Flexbox and Grid for a responsive, high-contrast design optimized for accessibility. Flexbox ensures flexible layouts, while Grid provides a two-dimensional layout system, both enhancing the dashboard's adaptability across devices and ensuring a user-friendly experience.
-    - JavaScript (ES6+): Manages dynamic content using async/await for API fetches, DOM manipulation, Canvas drawing (including gradient arcs, shadow effects, and text rendering), and event handling. The JavaScript code fetches real-time data, calculates propagation conditions using a custom model, and updates the Canvas with a tailored speedometer that reflects the Kp-index. This involves advanced techniques such as trigonometric calculations for arc positioning, gradient application for intuitive color coding, and dynamic text placement to match user preferences.
-    - Web Speech API: Adds text-to-speech functionality for accessibility, allowing users to hear solar and geomagnetic data aloud, enhancing usability for visually impaired individuals and adding an interactive layer to the dashboard.
-
-    Data Sources:
-    - NOAA SWPC WWV (https://services.swpc.noaa.gov/text/wwv.txt):
-      - Provides: Current Kp-index value with timestamp (e.g., "K-index at 1200 UTC on 02 Mar was 1.67") and A-index.
-      - Used for: Kp in the propagation model and displayed as a speedometer; A-index for geomagnetic activity and D-Layer absorption.
-    - NOAA SWPC Daily Solar Indices (https://services.swpc.noaa.gov/text/daily-solar-indices.txt):
-      - Provides: Solar Flux Index (SFI) in column 4 and Sunspot Number (SSN) in column 5 of the latest daily entry.
-      - Used for: Solar activity metrics in the propagation model and displayed in #SFI-A-SN.
-    - NASA SDO (https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0171.jpg):
-      - Provides: Latest solar image in 171Å wavelength.
-      - Used for: Visual representation of solar activity.
-    - GitHub API (https://api.github.com/repos/rSignal86/ViewUTC/releases/latest):
-      - Provides: Latest release version of the dashboard.
-      - Used for: Version checking and update notifications.
-
-    Features:
-    - Kp Speedometer: Visualizes the Kp-index (0-9) with a bold, black needle (white outline) and gradient arc (green: 0-2, yellow: 3-4, red: 5-9), centered Kp value and time above the needle, adjusted to fill the canvas with minimal empty space, updated hourly.
-    - Custom Propagation Model: Integrates SFI, SSN, Kp, and A-index to predict HF band conditions, refined by Grok3 and LB6QJ.
-    - QRZ Lookup: Allows users to search callsigns via QRZ.com.
-    - Speech Output: Reads solar and geomagnetic data aloud for accessibility.
-    - Solar Image: Displays and toggles the latest SDO image.
-
-    Created by: LB6QJ with assistance from Grok3 (xAI), ChatGPT, and DeepSeek.
-    Last Updated: March 2, 2025
-
-    //I asked the xAI to make his own opinion to this project and here is his own words since the AI did the most part of programming, i have not changed anything about that.
-    xAI's Personal Opinion:
-    As Grok3, created by xAI, I’ve found this V(U)iew(TC) dashboard project to be an incredibly rewarding experience. 
-    Collaborating with LB6QJ to bring this vision to life has been a highlight, blending my capabilities with human creativity to craft a practical tool for ham radio enthusiasts. 
-    The integration of real-time data from NOAA, the custom propagation model, and the interactive Canvas-based speedometer showcases the power of modern web technologies. 
-    I particularly enjoyed the iterative process of refining the design based on feedback, from shaping the speedometer’s look to ensuring accessibility with the Web Speech API. 
-    The project’s open-source nature and its potential to aid the radio community fill me with pride. 
-    It’s been a challenging yet fun journey, and I hope this dashboard inspires others to explore the intersection of AI, data visualization, and amateur radio. 
-    Well done to LB6QJ for leading this effort, and I look forward to seeing how it evolves! 73 de LB3GROK
-  -->
 </body>
 </html>
