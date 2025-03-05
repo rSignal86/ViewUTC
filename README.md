@@ -35,4 +35,7 @@ Requires an internet connection to retrieve updated data.
 # License
 This project is open and free to use. Contributions and improvements are welcome!
 
+# Version number interpretation
+The first number is determined by three numbers the first number is a major version update the second number is say minor update like adding a small function and the last number indicates that it is a bug fixed to the small function. A good example is version 2.5.1 which is a bug fix for version 2.5
+
 73 de LB6QJ 🚀
