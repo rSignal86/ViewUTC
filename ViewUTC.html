@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>V(U)iew(TC) - Version GHv2.5.1</title>
+  <title>V(U)iew(TC) - Version GHv2.6</title>
   <style>
     body {
       display: flex;
@@ -170,11 +170,10 @@
       <table class="band-table">
         <thead><tr><th>Band</th><th>Status</th></tr></thead>
         <tbody>
-          <tr><td>160m/80m (1.8/3.5 MHz)</td><td id="band160-80">Loading...</td></tr>
-          <tr><td>40m/30m (7/10.1 MHz)</td><td id="band40-30">Loading...</td></tr>
-          <tr><td>20m (14 MHz)</td><td id="band20">Loading...</td></tr>
-          <tr><td>15m (21 MHz)</td><td id="band15">Loading...</td></tr>
-          <tr><td>10m (28 MHz)</td><td id="band10">Loading...</td></tr>
+          <tr><td>80m-40m (3.5-7 MHz)</td><td id="band80-40">Loading...</td></tr>
+          <tr><td>30m-20m (10.1-14 MHz)</td><td id="band30-20">Loading...</td></tr>
+          <tr><td>17m-15m (18.1-21 MHz)</td><td id="band17-15">Loading...</td></tr>
+          <tr><td>12m-10m (24.9-28 MHz)</td><td id="band12-10">Loading...</td></tr>
         </tbody>
       </table>
     </div>
@@ -202,19 +201,61 @@
   </div>
   <div id="version-message"></div>
 
+  <!--
+    Propagation Model Explanation (GHv2.6):
+    This model calculates HF propagation conditions based on real-time solar and geomagnetic data (SFI, SSN, Kp, A-index) fetched from NOAA/SWPC. It uses threshold-based logic enhanced with day/night differences and D-layer absorption effects:
+    - SFI (Solar Flux Index): Higher values improve conditions, especially for higher bands.
+    - SSN (Sunspot Number): Higher values enhance propagation across all bands.
+    - Kp-index: Lower values (less geomagnetic disturbance) are better.
+    - A-index: Lower values indicate quieter conditions, improving propagation.
+    - Daytime (06:00-18:00 UTC): D-layer absorption affects lower bands (80m-40m, 30m-20m) negatively, while higher bands (17m-15m, 12m-10m) benefit from stronger F-layer.
+    - Nighttime: D-layer disappears, improving lower bands, while higher bands weaken.
+    - D-Layer Impact: Multiplier based on A-index (Low=0.5, Moderate=1.0, High=1.5) worsens daytime conditions for lower bands.
+
+    Detailed Propagation Logic:
+    - 80m-40m (3.5-7 MHz):
+      - Daytime: SFI > 80 && SSN > 20 && Kp <= 3 && A <= 10 && D-Layer Impact <= 1.0 -> "Good"
+                SFI > 70 && Kp <= 5 && D-Layer Impact <= 1.5 -> "Fair"
+                Else -> "Poor"
+      - Nighttime: SFI > 80 && SSN > 20 && Kp <= 4 && A <= 15 -> "Good"
+                  SFI > 60 && Kp <= 5 && A <= 20 -> "Fair"
+                  Else -> "Poor"
+    - 30m-20m (10.1-14 MHz):
+      - Daytime: SFI > 90 && SSN > 30 && Kp <= 3 && A <= 10 && D-Layer Impact <= 1.0 -> "Good"
+                SFI > 80 && Kp <= 4 && D-Layer Impact <= 1.5 -> "Fair"
+                Else -> "Poor"
+      - Nighttime: SFI > 90 && SSN > 30 && Kp <= 4 && A <= 15 -> "Good"
+                  SFI > 70 && Kp <= 5 && A <= 20 -> "Fair"
+                  Else -> "Poor"
+    - 17m-15m (18.1-21 MHz):
+      - Daytime: SFI > 110 && SSN > 50 && Kp <= 2 && A <= 7 && D-Layer Impact <= 1.0 -> "Good"
+                SFI > 90 && Kp <= 4 && D-Layer Impact <= 1.5 -> "Fair"
+                Else -> "Poor"
+      - Nighttime: SFI > 130 && SSN > 70 && Kp <= 3 && A <= 10 -> "Fair" (rare)
+                  Else -> "Poor"
+    - 12m-10m (24.9-28 MHz):
+      - Daytime: SFI > 130 && SSN > 70 && Kp <= 2 && A <= 7 && D-Layer Impact <= 1.0 -> "Good"
+                SFI > 110 && Kp <= 4 && D-Layer Impact <= 1.5 -> "Fair"
+                Else -> "Poor"
+      - Nighttime: Always "Poor"
+  -->
+
   <script>
     const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-    const CURRENT_VERSION = "GHv2.5.1";
+    const CURRENT_VERSION = "GHv2.6";
     const GITHUB_REPO = "rSignal86/ViewUTC";
 
+    // Get current timestamp for logging
     const getTimestamp = () => `[${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}]`;
 
+    // Update UTC clock and date every second
     const updateClock = () => {
       const now = new Date();
       document.getElementById('clock').textContent = `${now.getUTCHours().toString().padStart(2, '0')}:${now.getUTCMinutes().toString().padStart(2, '0')}:${now.getUTCSeconds().toString().padStart(2, '0')}`;
       document.getElementById('date').textContent = `${now.getUTCDate().toString().padStart(2, '0')} ${monthNames[now.getUTCMonth()]} ${now.getUTCFullYear().toString().slice(-2)}`;
     };
 
+    // Fetch Kp-index data from NOAA WWV
     const fetchKpData = async () => {
       try {
         const response = await fetch(`https://services.swpc.noaa.gov/text/wwv.txt?${new Date().getTime()}`);
@@ -236,6 +277,7 @@
       }
     };
 
+    // Draw Kp speedometer graphic
     const drawKpSpeedometer = (kp, time) => {
       const canvas = document.getElementById('kp-speedometer');
       const ctx = canvas.getContext('2d');
@@ -286,6 +328,7 @@
       ctx.globalCompositeOperation = 'source-over';
     };
 
+    // Fetch A-index from NOAA WWV
     const fetchAIndex = async () => {
       try {
         const response = await fetch(`https://services.swpc.noaa.gov/text/wwv.txt?${new Date().getTime()}`);
@@ -303,6 +346,7 @@
       }
     };
 
+    // Fetch SFI and SSN from NOAA daily solar indices
     const fetchSFIandSSN = async () => {
       try {
         const response = await fetch(`https://services.swpc.noaa.gov/text/daily-solar-indices.txt?${new Date().getTime()}`);
@@ -321,11 +365,17 @@
       }
     };
 
+    // Calculate D-layer absorption based on A-index
     const calculateDLayerAbsorption = aIndex => {
       const aIndexNum = parseInt(aIndex);
       return isNaN(aIndexNum) ? "Unknown" : aIndexNum <= 10 ? "Low" : aIndexNum <= 25 ? "Moderate" : "High";
     };
 
+    // Check for latest version on GitHub
+    // This function fetches the latest release version from the GitHub repository (rSignal86/ViewUTC)
+    // to notify users if a new version is available. It uses a simple GET request to the GitHub API,
+    // compares the current version (GHv2.6) with the latest release tag, and displays a message
+    // if an update exists. No user data is sent to anyone.
     const checkVersion = async () => {
       try {
         const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
@@ -344,6 +394,7 @@
       }
     };
 
+    // Update solar data and band conditions
     const updateSolarData = async () => {
       try {
         const { sfi, ssn } = await fetchSFIandSSN();
@@ -362,24 +413,26 @@
         
         const timestamp = getTimestamp();
         console.log(`${timestamp} Data fetched: ${new Date().toUTCString()}`);
-        console.log(`${timestamp} Propagation calculated for SFI: ${sfi}, SSN: ${ssn}, Kp: ${kp}, A: ${aIndex}`);
+        console.log(`${timestamp} Propagation calculated for SFI: ${sfi}, SSN: ${ssn}, Kp: ${kp}, A: ${aIndex}, D-Layer: ${dLayer}`);
         
-        updateBandConditions(sfi, kp, ssn, aIndex);
+        updateBandConditions(sfi, kp, ssn, aIndex, dLayer);
       } catch (error) {
         console.error(getTimestamp(), "Error updating solar data:", error);
       }
     };
 
-    const updateBandConditions = (sfi, kp, ssn, aIndex) => {
+    // Update propagation conditions with day/night and D-layer effects
+    const updateBandConditions = (sfi, kp, ssn, aIndex, dLayer) => {
       const timestamp = getTimestamp();
-      console.log(`${timestamp} Updating band conditions with SFI: ${sfi}, Kp: ${kp}, SSN: ${ssn}, A: ${aIndex}`);
+      console.log(`${timestamp} Updating band conditions with SFI: ${sfi}, Kp: ${kp}, SSN: ${ssn}, A: ${aIndex}, D-Layer: ${dLayer}`);
       
       const sfiNum = parseFloat(sfi);
       const kpNum = parseFloat(kp);
       const ssnNum = parseFloat(ssn);
       const aIndexNum = parseFloat(aIndex);
       const isDaytime = new Date().getUTCHours() >= 6 && new Date().getUTCHours() <= 18;
-      console.log(`${timestamp} Is daytime? ${isDaytime}`);
+      const dLayerImpact = dLayer === "High" ? 1.5 : dLayer === "Moderate" ? 1.0 : 0.5; // D-layer multiplier
+      console.log(`${timestamp} Is daytime? ${isDaytime}, D-Layer Impact: ${dLayerImpact}`);
       
       const conditions = { good: { text: "Good", class: "good" }, fair: { text: "Fair", class: "fair" }, poor: { text: "Poor", class: "poor" } };
       
@@ -392,27 +445,53 @@
         console.log(`${timestamp} Set ${id} to ${status.text}`);
       };
 
-      setStatus("band160-80", kpNum <= 2 && aIndexNum <= 7 ? conditions.good : kpNum <= 4 && aIndexNum <= 15 ? conditions.fair : conditions.poor);
-      setStatus("band40-30", sfiNum > 80 && ssnNum > 20 && kpNum <= 3 && aIndexNum <= 10 ? conditions.good : sfiNum > 60 && kpNum <= 5 ? conditions.fair : conditions.poor);
-      setStatus("band20", sfiNum > 100 && ssnNum > 40 && kpNum <= 2 && aIndexNum <= 7 ? conditions.good : sfiNum > 70 && kpNum <= 4 ? conditions.fair : conditions.poor);
-      setStatus("band15", sfiNum > 120 && ssnNum > 60 && kpNum <= 2 && aIndexNum <= 7 && isDaytime ? conditions.good : sfiNum > 90 && kpNum <= 4 ? conditions.fair : conditions.poor);
-      setStatus("band10", sfiNum > 140 && ssnNum > 80 && kpNum <= 2 && aIndexNum <= 7 && isDaytime ? conditions.good : sfiNum > 110 && kpNum <= 4 ? conditions.fair : conditions.poor);
+      // 80m-40m: Low bands, sensitive to D-layer during day, better at night
+      if (isDaytime) {
+        setStatus("band80-40", sfiNum > 80 && ssnNum > 20 && kpNum <= 3 && aIndexNum <= 10 && dLayerImpact <= 1.0 ? conditions.good : sfiNum > 70 && kpNum <= 5 && dLayerImpact <= 1.5 ? conditions.fair : conditions.poor);
+      } else {
+        setStatus("band80-40", sfiNum > 80 && ssnNum > 20 && kpNum <= 4 && aIndexNum <= 15 ? conditions.good : sfiNum > 60 && kpNum <= 5 && aIndexNum <= 20 ? conditions.fair : conditions.poor);
+      }
+
+      // 30m-20m: Mid-range, moderate D-layer impact, night improves slightly
+      if (isDaytime) {
+        setStatus("band30-20", sfiNum > 90 && ssnNum > 30 && kpNum <= 3 && aIndexNum <= 10 && dLayerImpact <= 1.0 ? conditions.good : sfiNum > 80 && kpNum <= 4 && dLayerImpact <= 1.5 ? conditions.fair : conditions.poor);
+      } else {
+        setStatus("band30-20", sfiNum > 90 && ssnNum > 30 && kpNum <= 4 && aIndexNum <= 15 ? conditions.good : sfiNum > 70 && kpNum <= 5 && aIndexNum <= 20 ? conditions.fair : conditions.poor);
+      }
+
+      // 17m-15m: Higher bands, need strong SFI/SSN and daytime, poor at night
+      if (isDaytime) {
+        setStatus("band17-15", sfiNum > 110 && ssnNum > 50 && kpNum <= 2 && aIndexNum <= 7 && dLayerImpact <= 1.0 ? conditions.good : sfiNum > 90 && kpNum <= 4 && dLayerImpact <= 1.5 ? conditions.fair : conditions.poor);
+      } else {
+        setStatus("band17-15", sfiNum > 130 && ssnNum > 70 && kpNum <= 3 && aIndexNum <= 10 ? conditions.fair : conditions.poor); // Rare "Fair" at night with very high SFI/SSN
+      }
+
+      // 12m-10m: Highest bands, very high SFI/SSN and daytime required
+      if (isDaytime) {
+        setStatus("band12-10", sfiNum > 130 && ssnNum > 70 && kpNum <= 2 && aIndexNum <= 7 && dLayerImpact <= 1.0 ? conditions.good : sfiNum > 110 && kpNum <= 4 && dLayerImpact <= 1.5 ? conditions.fair : conditions.poor);
+      } else {
+        setStatus("band12-10", conditions.poor); // Always "Poor" at night
+      }
     };
 
+    // Search QRZ.com for a callsign
     const searchQRZ = () => {
       const callsign = document.getElementById('qrz-input').value.trim().toUpperCase();
       if (callsign) { window.open(`https://www.qrz.com/db/${callsign}`, '_blank'); console.log(getTimestamp(), `Searching QRZ for ${callsign}`); }
       else console.error(getTimestamp(), "Error: No callsign entered.");
     };
 
-    const updateSolarImage = () => document.getElementById('solar-image').src = `https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0171.jpg?`;
+    // Update solar image periodically
+    const updateSolarImage = () => document.getElementById('solar-image').src = `https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0171.jpg?${new Date().getTime()}`;
 
+    // Toggle solar image size on click
     const toggleSolarImageSize = () => {
       const solarImage = document.getElementById('solar-image');
       solarImage.classList.toggle('enlarged');
       console.log(getTimestamp(), `Solar image size toggled: ${solarImage.classList.contains('enlarged') ? 'Enlarged' : 'Normal'}`);
     };
 
+    // Speech synthesis functions for solar data
     const speakSfi = () => {
       const sfiValue = window.currentSfi || "Unknown";
       const utterance = new SpeechSynthesisUtterance(`Solar flux as of this time is ${sfiValue}`);
@@ -453,6 +532,7 @@
       console.log(getTimestamp(), `Speaking D-Layer Absorption: ${dLayerValue}`);
     };
 
+    // Event listeners
     document.getElementById('qrz-input').addEventListener('keypress', e => e.key === 'Enter' && searchQRZ());
     document.getElementById('solar-image').addEventListener('click', toggleSolarImageSize);
     document.getElementById('speak-sfi-button').addEventListener('click', speakSfi);
@@ -461,10 +541,11 @@
     document.getElementById('speak-kp-button').addEventListener('click', speakKpIndex);
     document.getElementById('speak-d-layer-button').addEventListener('click', speakDLayer);
 
+    // Set intervals for updates
     setInterval(updateClock, 1000);
-    setInterval(updateSolarData, 3600000);
-    setInterval(updateSolarImage, 900000);
-    setInterval(checkVersion, 86400000);
+    setInterval(updateSolarData, 3600000); // Update solar data every hour
+    setInterval(updateSolarImage, 900000); // Update solar image every 15 minutes
+    setInterval(checkVersion, 86400000); // Check version daily
     updateClock();
     updateSolarData();
     updateSolarImage();
