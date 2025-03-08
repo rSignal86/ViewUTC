@@ -50,4 +50,7 @@ The model relies on the following parameters:
 --- Poor: Always (nighttime propagation is negligible).
 
 #Calculation Method
-The model fetches Kp and A Index from wwv.txt for real-time accuracy, with SFI and SSN from daily-solar-cycle-indices.txt. The day/night check uses UTC time (06:00–18:00 for daytime), and D-layer impact is calculated as a multiplier based on A Index thresholds. Conditions are evaluated using nested conditional logic, prioritizing solar activity (SFI/SSN) for band openings and geomagnetic stability (Kp/A) for signal quality, adjusted by diurnal effects. Thresholds are tuned based on amateur radio observations, e.g., Kp ≤ 4 yields "Fair" on 12m-10m during daytime, aligning with practical HF experience.
+The model fetches Kp and A Index from wwv.txt for real-time accuracy, with SFI and SSN from daily-solar-cycle-indices.txt. 
+The day/night check uses UTC time (06:00–18:00 for daytime), and D-layer impact is calculated as a multiplier based on A Index thresholds. 
+Conditions are evaluated using nested conditional logic, prioritizing solar activity (SFI/SSN) for band openings and geomagnetic stability (Kp/A) for signal quality, adjusted by diurnal effects. 
+Thresholds are tuned based on amateur radio observations, e.g., Kp ≤ 4 yields "Fair" on 12m-10m during daytime, aligning with practical HF experience.
