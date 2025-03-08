@@ -13,41 +13,44 @@ The model relies on the following parameters:
 
 # Band Calculations
 - 80m-40m (3.5-7 MHz)
--- Daytime (06:00-18:00 UTC):
---- Good: SFI > 80, SSN > 20, Kp ≤ 3, A ≤ 10, D-Layer Impact ≤ 1.0 (needs moderate solar activity and calm conditions despite D-layer).
---- Fair: SFI > 70, Kp ≤ 5, D-Layer Impact ≤ 1.5 (tolerates some disturbance and absorption).
---- Poor: Otherwise (high disturbance or strong D-layer absorption disrupts signals).
--- Nighttime:
---- Good: SFI > 80, SSN > 20, Kp ≤ 4, A ≤ 15 (benefits from no D-layer, tolerates slightly more disturbance).
---- Fair: SFI > 60, Kp ≤ 5, A ≤ 20 (works with lower activity, still usable).
---- Poor: Otherwise (insufficient activity or excessive disturbance).
+  - Daytime (06:00-18:00 UTC):
+      - Good: SFI > 80, SSN > 20, Kp ≤ 3, A ≤ 10, D-Layer Impact ≤ 1.0 (needs moderate solar activity and calm conditions despite D-layer).
+      - Fair: SFI > 70, Kp ≤ 5, D-Layer Impact ≤ 1.5 (tolerates some disturbance and absorption).
+      - Poor: Otherwise (high disturbance or strong D-layer absorption disrupts signals).
+  - Nighttime:
+      - Good: SFI > 80, SSN > 20, Kp ≤ 4, A ≤ 15 (benefits from no D-layer, tolerates slightly more disturbance).
+      - Fair: SFI > 60, Kp ≤ 5, A ≤ 20 (works with lower activity, still usable).
+      - Poor: Otherwise (insufficient activity or excessive disturbance).
+
 - 30m-20m (10.1-14 MHz)
--- Daytime (06:00-18:00 UTC):
---- Good: SFI > 90, SSN > 30, Kp ≤ 3, A ≤ 10, D-Layer Impact ≤ 1.0 (requires stronger solar input, stable conditions).
---- Fair: SFI > 80, Kp ≤ 4, D-Layer Impact ≤ 1.5 (moderate activity and tolerable disturbance).
---- Poor: Otherwise (low activity or high disturbance weakens propagation).
--- Nighttime:
---- Good: SFI > 90, SSN > 30, Kp ≤ 4, A ≤ 15 (good with no D-layer, slightly relaxed stability).
---- Fair: SFI > 70, Kp ≤ 5, A ≤ 20 (still functional with lower activity).
---- Poor: Otherwise (insufficient solar support or geomagnetic interference).
+  - Daytime (06:00-18:00 UTC):
+      - Good: SFI > 90, SSN > 30, Kp ≤ 3, A ≤ 10, D-Layer Impact ≤ 1.0 (requires stronger solar input, stable conditions).
+      - Fair: SFI > 80, Kp ≤ 4, D-Layer Impact ≤ 1.5 (moderate activity and tolerable disturbance).
+      - Poor: Otherwise (low activity or high disturbance weakens propagation).
+  - Nighttime:
+      - Good: SFI > 90, SSN > 30, Kp ≤ 4, A ≤ 15 (good with no D-layer, slightly relaxed stability).
+      - Fair: SFI > 70, Kp ≤ 5, A ≤ 20 (still functional with lower activity).
+      - Poor: Otherwise (insufficient solar support or geomagnetic interference).
+        
 - 17m-15m (18.1-21 MHz)
--- Daytime (06:00-18:00 UTC):
---- Good: SFI > 110, SSN > 50, Kp ≤ 2, A ≤ 7, D-Layer Impact ≤ 1.0 (needs high solar activity and very stable conditions).
---- Fair: SFI > 90, Kp ≤ 4, D-Layer Impact ≤ 1.5 (usable with moderate activity and some disturbance).
---- Poor: Otherwise (lacking solar strength or too unstable).
-- Nighttime:
---- Good: Not achievable (higher bands typically close at night due to weaker F-layer).
---- Fair: SFI > 130, SSN > 70, Kp ≤ 3, A ≤ 10 (rare, requires exceptional solar activity).
---- Poor: Otherwise (nighttime typically shuts these bands).
+  - Daytime (06:00-18:00 UTC):
+      - Good: SFI > 110, SSN > 50, Kp ≤ 2, A ≤ 7, D-Layer Impact ≤ 1.0 (needs high solar activity and very stable conditions).
+      - Fair: SFI > 90, Kp ≤ 4, D-Layer Impact ≤ 1.5 (usable with moderate activity and some disturbance).
+      - Poor: Otherwise (lacking solar strength or too unstable).
+  - Nighttime:
+      - Good: Not achievable (higher bands typically close at night due to weaker F-layer).
+      - Fair: SFI > 130, SSN > 70, Kp ≤ 3, A ≤ 10 (rare, requires exceptional solar activity).
+      - Poor: Otherwise (nighttime typically shuts these bands).
+        
 - 12m-10m (24.9-28 MHz)
--- Daytime (06:00-18:00 UTC):
---- Good: SFI > 130, SSN > 70, Kp ≤ 2, A ≤ 7, D-Layer Impact ≤ 1.0 (demands peak solar activity and calm conditions).
---- Fair: SFI > 110, Kp ≤ 4, D-Layer Impact ≤ 1.5 (open with moderate activity, tolerates slight disturbance).
---- Poor: Otherwise (insufficient solar input or geomagnetic instability).
--- Nighttime:
---- Good: Not achievable (bands close at night due to ionospheric collapse).
---- Fair: Not achievable.
---- Poor: Always (nighttime propagation is negligible).
+  - Daytime (06:00-18:00 UTC):
+    - Good: SFI > 130, SSN > 70, Kp ≤ 2, A ≤ 7, D-Layer Impact ≤ 1.0 (demands peak solar activity and calm conditions).
+    - Fair: SFI > 110, Kp ≤ 4, D-Layer Impact ≤ 1.5 (open with moderate activity, tolerates slight disturbance).
+    - Poor: Otherwise (insufficient solar input or geomagnetic instability).
+  - Nighttime:
+    - Good: Not achievable (bands close at night due to ionospheric collapse).
+    - Fair: Not achievable.
+    - Poor: Always (nighttime propagation is negligible).
 
 # Calculation Method
 The model fetches Kp and A Index from wwv.txt for real-time accuracy, with SFI and SSN from daily-solar-cycle-indices.txt. 
