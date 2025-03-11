@@ -36,7 +36,7 @@ V(U)iew(TC) checks for updates daily by querying GitHub's public API (`https://a
 If you have questions about this Privacy Policy or V(U)iew(TC)'s data practices, please contact:
 - **Developer:** LB6QJ
 - **GitHub:** [rSignal86/ViewUTC](https://github.com/rSignal86/ViewUTC)
-- **Email:** (Add your preferred contact email here, if applicable)
+- **Radio:** 145,500 MHZ
 
 ## Changes to This Policy
 We may update this Privacy Policy to reflect changes in V(U)iew(TC) or legal requirements. Any updates will be posted here with a revised "Last updated" date.
