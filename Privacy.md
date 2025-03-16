@@ -1,6 +1,6 @@
-# Privacy Policy for V(U)iew(TC) GHv2.6
+# Privacy Policy for V(U)iew(TC) GHv2.7
 
-*Last updated: March 08, 2025*
+*Last updated: March 16, 2025*
 
 ## Introduction
 V(U)iew(TC) is a lightweight dashboard designed for amateur radio enthusiasts to monitor HF propagation conditions using publicly available solar and geomagnetic data. This Privacy Policy explains how we handle your data in compliance with the General Data Protection Regulation (GDPR) and other applicable laws.
