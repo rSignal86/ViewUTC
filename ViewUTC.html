@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>V(U)iew(TC) - Version GHv2.6</title>
+  <title>V(U)iew(TC) - Version GHv2.7</title>
   <style>
     body {
       display: flex;
@@ -43,9 +43,9 @@
       justify-content: center;
       align-items: center;
     }
-    #kp-speedometer {
+    #kp-bar {
       width: 300px;
-      height: 200px;
+      height: 100px;
     }
     #clock {
       font-size: 60px;
@@ -175,7 +175,7 @@
 <body>
   <div id="title">V(U)iew(TC) - A Silly Little Dashboard</div>
   <div class="grid-container">
-    <div class="box"><canvas id="kp-speedometer" width="300" height="200"></canvas></div>
+    <div class="box"><canvas id="kp-bar" width="300" height="100"></canvas></div>
     <div class="box"><div id="clock">00:00:00</div><div id="date">28 FEB 25</div></div>
     <div class="box">
       <table class="band-table">
@@ -192,14 +192,11 @@
       <div id="SFI-A-SN">
         <span id="sfi-value">Downloading SFI...</span>
         <span id="a-index-value">Downloading A-Index...</span>
+        <span id="kp-value">Downloading Kp-Index...</span>
         <span id="sunspot-value">Downloading Sunspot Number...</span>
         <span id="d-layer-value">Downloading D-Layer Absorption...</span>
         <div class="speak-buttons-container">
-          <button id="speak-sfi-button" class="speak-button">Say: SFI</button>
-          <button id="speak-a-index-button" class="speak-button">Say: A-Index</button>
-          <button id="speak-sunspot-button" class="speak-button">Say: Sunspot</button>
-          <button id="speak-kp-button" class="speak-button">Say: Kp-Index</button>
-          <button id="speak-d-layer-button" class="speak-button">Say: D-Layer</button>
+          <button id="speak-weather-report-button" class="speak-button">Say: HF Report</button>
         </div>
       </div>
     </div>
@@ -219,47 +216,20 @@
   <div id="version-message"></div>
 
   <!--
-    Propagation Model Explanation (GHv2.6):
+    Propagation Model Explanation (GHv2.7):
     This model calculates HF propagation conditions based on real-time solar and geomagnetic data (SFI, SSN, Kp, A-index) fetched from NOAA/SWPC. It uses threshold-based logic enhanced with day/night differences and D-layer absorption effects:
     - SFI (Solar Flux Index): Higher values improve conditions, especially for higher bands.
     - SSN (Sunspot Number): Higher values enhance propagation across all bands.
-    - Kp-index: Lower values (less geomagnetic disturbance) are better.
+    - Kp-index: Lower values (less geomagnetic disturbance) are better; displayed in a horizontal bar (0-9) with text and timestamp, serving as the primary source.
     - A-index: Lower values indicate quieter conditions, improving propagation.
     - Daytime (06:00-18:00 UTC): D-layer absorption affects lower bands (80m-40m, 30m-20m) negatively, while higher bands (17m-15m, 12m-10m) benefit from stronger F-layer.
     - Nighttime: D-layer disappears, improving lower bands, while higher bands weaken.
     - D-Layer Impact: Multiplier based on A-index (Low=0.5, Moderate=1.0, High=1.5) worsens daytime conditions for lower bands.
-
-    Detailed Propagation Logic:
-    - 80m-40m (3.5-7 MHz):
-      - Daytime: SFI > 80 && SSN > 20 && Kp <= 3 && A <= 10 && D-Layer Impact <= 1.0 -> "Good"
-                SFI > 70 && Kp <= 5 && D-Layer Impact <= 1.5 -> "Fair"
-                Else -> "Poor"
-      - Nighttime: SFI > 80 && SSN > 20 && Kp <= 4 && A <= 15 -> "Good"
-                  SFI > 60 && Kp <= 5 && A <= 20 -> "Fair"
-                  Else -> "Poor"
-    - 30m-20m (10.1-14 MHz):
-      - Daytime: SFI > 90 && SSN > 30 && Kp <= 3 && A <= 10 && D-Layer Impact <= 1.0 -> "Good"
-                SFI > 80 && Kp <= 4 && D-Layer Impact <= 1.5 -> "Fair"
-                Else -> "Poor"
-      - Nighttime: SFI > 90 && SSN > 30 && Kp <= 4 && A <= 15 -> "Good"
-                  SFI > 70 && Kp <= 5 && A <= 20 -> "Fair"
-                  Else -> "Poor"
-    - 17m-15m (18.1-21 MHz):
-      - Daytime: SFI > 110 && SSN > 50 && Kp <= 2 && A <= 7 && D-Layer Impact <= 1.0 -> "Good"
-                SFI > 90 && Kp <= 4 && D-Layer Impact <= 1.5 -> "Fair"
-                Else -> "Poor"
-      - Nighttime: SFI > 130 && SSN > 70 && Kp <= 3 && A <= 10 -> "Fair" (rare)
-                  Else -> "Poor"
-    - 12m-10m (24.9-28 MHz):
-      - Daytime: SFI > 130 && SSN > 70 && Kp <= 2 && A <= 7 && D-Layer Impact <= 1.0 -> "Good"
-                SFI > 110 && Kp <= 4 && D-Layer Impact <= 1.5 -> "Fair"
-                Else -> "Poor"
-      - Nighttime: Always "Poor"
   -->
 
   <script>
     const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-    const CURRENT_VERSION = "GHv2.6";
+    const CURRENT_VERSION = "GHv2.7";
     const GITHUB_REPO = "rSignal86/ViewUTC";
 
     // Get current timestamp for logging
@@ -284,65 +254,79 @@
         if (!kpMatch) throw new Error("Kp value not found in WWV data");
         const time = kpMatch[1];
         const kpValue = parseFloat(kpMatch[2]);
-        drawKpSpeedometer(kpValue, time);
         console.log(getTimestamp(), `Fetched Kp: ${kpValue} at ${time} UTC from WWV`);
-        return kpValue;
+        return { value: kpValue, time: time };
       } catch (error) {
         console.error(getTimestamp(), "Error fetching Kp data:", error);
-        drawKpSpeedometer(0, "Error");
-        return "Unknown";
+        return { value: "Unknown", time: "Error" };
       }
     };
 
-    // Draw Kp speedometer graphic
-    const drawKpSpeedometer = (kp, time) => {
-      const canvas = document.getElementById('kp-speedometer');
+    // Draw Kp bar with animation
+    const drawKpBar = (kp, time) => {
+      const canvas = document.getElementById('kp-bar');
       const ctx = canvas.getContext('2d');
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2 + 50;
-      const radius = 130;
+      const width = canvas.width;
+      const height = canvas.height;
+      const barHeight = 20;
+      const padding = 20;
+      const barWidth = width - 2 * padding;
+      const segmentWidth = barWidth / 9;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Clear canvas
+      ctx.clearRect(0, 0, width, height);
 
-      const gradient = ctx.createLinearGradient(centerX - radius, centerY, centerX + radius, centerY);
-      gradient.addColorStop(0, '#4CAF50');
-      gradient.addColorStop(0.5, '#FFEB3B');
-      gradient.addColorStop(1, '#F44336');
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, Math.PI, 2 * Math.PI, false);
-      ctx.lineWidth = 20;
-      ctx.strokeStyle = '#444';
-      ctx.stroke();
+      // Draw background bar with segments
+      ctx.fillStyle = '#444';
+      ctx.fillRect(padding, height / 2 - barHeight / 2, barWidth, barHeight);
 
-      const angle = Math.PI + (kp / 9) * Math.PI;
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, Math.PI, angle, false);
-      ctx.lineWidth = 20;
-      ctx.strokeStyle = gradient;
-      ctx.stroke();
+      // Draw segment lines
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 9; i++) {
+        const x = padding + i * segmentWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, height / 2 - barHeight / 2);
+        ctx.lineTo(x, height / 2 + barHeight / 2);
+        ctx.stroke();
+        ctx.font = '12px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.fillText(i, x, height / 2 - barHeight / 2 - 5);
+      }
 
-      ctx.font = '30px Arial';
+      // Animate the fill
+      let currentWidth = 0;
+      const targetWidth = kp === "Unknown" ? 0 : (kp / 9) * barWidth;
+      const gradient = ctx.createLinearGradient(padding, 0, padding + barWidth, 0);
+      gradient.addColorStop(0, '#4CAF50'); // Green
+      gradient.addColorStop(0.33, '#FFEB3B'); // Yellow
+      gradient.addColorStop(0.66, '#F44336'); // Red
+
+      const animateFill = () => {
+        ctx.fillStyle = gradient;
+        ctx.fillRect(padding, height / 2 - barHeight / 2, currentWidth, barHeight);
+
+        if (currentWidth < targetWidth) {
+          currentWidth += (targetWidth - currentWidth) * 0.05; // Smooth easing
+          requestAnimationFrame(animateFill);
+        } else {
+          ctx.fillRect(padding, height / 2 - barHeight / 2, targetWidth, barHeight); // Ensure full fill
+        }
+      };
+      animateFill();
+
+      // Draw Kp value and time centered in the middle of the bar
+      const centerX = width / 2;
+      ctx.font = '20px Arial';
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
-      ctx.fillText(`Kp: ${kp}`, centerX, centerY - 60);
+      const kpText = `Kp: ${kp}`;
+      ctx.fillText(kpText, centerX, height / 2 - barHeight / 2 - 15); // Above bar
+
       ctx.font = '14px Arial';
-      ctx.fillText(`at ${time}`, centerX, centerY - 40);
-
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      ctx.lineTo(centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle));
-      ctx.lineWidth = 8;
-      ctx.strokeStyle = 'black';
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      ctx.lineTo(centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle));
-      ctx.lineWidth = 12;
-      ctx.strokeStyle = 'white';
-      ctx.globalCompositeOperation = 'destination-over';
-      ctx.stroke();
-      ctx.globalCompositeOperation = 'source-over';
+      const timeText = `at ${time} UTC`;
+      ctx.fillText(timeText, centerX, height / 2 + barHeight / 2 + 20); // Below bar
     };
 
     // Fetch A-index from NOAA WWV
@@ -389,10 +373,6 @@
     };
 
     // Check for latest version on GitHub
-    // This function fetches the latest release version from the GitHub repository (rSignal86/ViewUTC)
-    // to notify users if a new version is available. It uses a simple GET request to the GitHub API,
-    // compares the current version (GHv2.6) with the latest release tag, and displays a message
-    // if an update exists. No user data is sent – it only downloads public release info once daily.
     const checkVersion = async () => {
       try {
         const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
@@ -415,13 +395,23 @@
     const updateSolarData = async () => {
       try {
         const { sfi, ssn } = await fetchSFIandSSN();
-        const kp = await fetchKpData();
+        const kpData = await fetchKpData();
+        const kp = kpData.value;
+        const kpTime = kpData.time;
         const aIndex = await fetchAIndex();
         const dLayer = calculateDLayerAbsorption(aIndex);
+
+        // Update text displays
         document.getElementById("sfi-value").textContent = `SFI: ${sfi}`;
         document.getElementById("a-index-value").textContent = `A-Index: ${aIndex}`;
+        document.getElementById("kp-value").textContent = `Kp-Index: ${kp}`;
         document.getElementById("sunspot-value").textContent = `Sunspot Number: ${ssn}`;
         document.getElementById("d-layer-value").textContent = `D-Layer Absorption: ${dLayer}`;
+
+        // Update Kp bar with animation
+        drawKpBar(kp, kpTime);
+
+        // Store values globally
         window.currentSfi = sfi;
         window.currentKp = kp;
         window.currentSunspots = ssn;
@@ -448,7 +438,7 @@
       const ssnNum = parseFloat(ssn);
       const aIndexNum = parseFloat(aIndex);
       const isDaytime = new Date().getUTCHours() >= 6 && new Date().getUTCHours() <= 18;
-      const dLayerImpact = dLayer === "High" ? 1.5 : dLayer === "Moderate" ? 1.0 : 0.5; // D-layer multiplier
+      const dLayerImpact = dLayer === "High" ? 1.5 : dLayer === "Moderate" ? 1.0 : 0.5;
       console.log(`${timestamp} Is daytime? ${isDaytime}, D-Layer Impact: ${dLayerImpact}`);
       
       const conditions = { good: { text: "Good", class: "good" }, fair: { text: "Fair", class: "fair" }, poor: { text: "Poor", class: "poor" } };
@@ -462,32 +452,28 @@
         console.log(`${timestamp} Set ${id} to ${status.text}`);
       };
 
-      // 80m-40m: Low bands, sensitive to D-layer during day, better at night
       if (isDaytime) {
         setStatus("band80-40", sfiNum > 80 && ssnNum > 20 && kpNum <= 3 && aIndexNum <= 10 && dLayerImpact <= 1.0 ? conditions.good : sfiNum > 70 && kpNum <= 5 && dLayerImpact <= 1.5 ? conditions.fair : conditions.poor);
       } else {
         setStatus("band80-40", sfiNum > 80 && ssnNum > 20 && kpNum <= 4 && aIndexNum <= 15 ? conditions.good : sfiNum > 60 && kpNum <= 5 && aIndexNum <= 20 ? conditions.fair : conditions.poor);
       }
 
-      // 30m-20m: Mid-range, moderate D-layer impact, night improves slightly
       if (isDaytime) {
         setStatus("band30-20", sfiNum > 90 && ssnNum > 30 && kpNum <= 3 && aIndexNum <= 10 && dLayerImpact <= 1.0 ? conditions.good : sfiNum > 80 && kpNum <= 4 && dLayerImpact <= 1.5 ? conditions.fair : conditions.poor);
       } else {
         setStatus("band30-20", sfiNum > 90 && ssnNum > 30 && kpNum <= 4 && aIndexNum <= 15 ? conditions.good : sfiNum > 70 && kpNum <= 5 && aIndexNum <= 20 ? conditions.fair : conditions.poor);
       }
 
-      // 17m-15m: Higher bands, need strong SFI/SSN and daytime, poor at night
       if (isDaytime) {
         setStatus("band17-15", sfiNum > 110 && ssnNum > 50 && kpNum <= 2 && aIndexNum <= 7 && dLayerImpact <= 1.0 ? conditions.good : sfiNum > 90 && kpNum <= 4 && dLayerImpact <= 1.5 ? conditions.fair : conditions.poor);
       } else {
-        setStatus("band17-15", sfiNum > 130 && ssnNum > 70 && kpNum <= 3 && aIndexNum <= 10 ? conditions.fair : conditions.poor); // Rare "Fair" at night with very high SFI/SSN
+        setStatus("band17-15", sfiNum > 130 && ssnNum > 70 && kpNum <= 3 && aIndexNum <= 10 ? conditions.fair : conditions.poor);
       }
 
-      // 12m-10m: Highest bands, very high SFI/SSN and daytime required
       if (isDaytime) {
         setStatus("band12-10", sfiNum > 130 && ssnNum > 70 && kpNum <= 2 && aIndexNum <= 7 && dLayerImpact <= 1.0 ? conditions.good : sfiNum > 110 && kpNum <= 4 && dLayerImpact <= 1.5 ? conditions.fair : conditions.poor);
       } else {
-        setStatus("band12-10", conditions.poor); // Always "Poor" at night
+        setStatus("band12-10", conditions.poor);
       }
     };
 
@@ -508,55 +494,66 @@
       console.log(getTimestamp(), `Solar image size toggled: ${solarImage.classList.contains('enlarged') ? 'Enlarged' : 'Normal'}`);
     };
 
-    // Speech synthesis functions for solar data
-    const speakSfi = () => {
-      const sfiValue = window.currentSfi || "Unknown";
-      const utterance = new SpeechSynthesisUtterance(`Solar flux as of this time is ${sfiValue}`);
-      utterance.lang = 'en-US';
-      speechSynthesis.speak(utterance);
-      console.log(getTimestamp(), `Speaking SFI: ${sfiValue}`);
-    };
+    // Speak HF propagation weather report with sequential playback
+    const speakWeatherReport = () => {
+      const now = new Date();
+      const utcTime = `${now.getUTCHours().toString().padStart(2, '0')}:${now.getUTCMinutes().toString().padStart(2, '0')} UTC`;
+      
+      // Ensure all values are valid strings, default to "unknown" if undefined
+      const sfi = window.currentSfi !== undefined ? String(window.currentSfi) : "unknown";
+      const kp = window.currentKp !== undefined ? String(window.currentKp) : "unknown";
+      const ssn = window.currentSunspots !== undefined ? String(window.currentSunspots) : "unknown";
+      const aIndex = window.currentAIndex !== undefined ? String(window.currentAIndex) : "unknown";
+      const dLayer = window.currentDLayer !== undefined ? String(window.currentDLayer) : "unknown";
+      
+      // Fetch band statuses, ensure they’re valid
+      const band80_40 = document.getElementById('band80-40')?.textContent || "unknown";
+      const band30_20 = document.getElementById('band30-20')?.textContent || "unknown";
+      const band17_15 = document.getElementById('band17-15')?.textContent || "unknown";
+      const band12_10 = document.getElementById('band12-10')?.textContent || "unknown";
 
-    const speakAIndex = () => {
-      const aIndexValue = window.currentAIndex || "Unknown";
-      const utterance = new SpeechSynthesisUtterance(`The A Index as of this time is ${aIndexValue}`);
-      utterance.lang = 'en-US';
-      speechSynthesis.speak(utterance);
-      console.log(getTimestamp(), `Speaking A-Index: ${aIndexValue}`);
-    };
+      const isDaytime = now.getUTCHours() >= 6 && now.getUTCHours() <= 18;
+      const dayNightNote = isDaytime ? "It's daytime in UTC, so lower bands may be affected by D-layer absorption." : "It's nighttime in UTC, improving lower bands.";
 
-    const speakSunspot = () => {
-      const sunspotValue = window.currentSunspots || "Unknown";
-      const utterance = new SpeechSynthesisUtterance(`Sunspot Number as of this time is ${sunspotValue}`);
-      utterance.lang = 'en-US';
-      speechSynthesis.speak(utterance);
-      console.log(getTimestamp(), `Speaking Sunspot Number: ${sunspotValue}`);
-    };
+      // Split the message into smaller parts to avoid cutoff
+      const messages = [
+        `Here’s the HF propagation weather report at ${utcTime}.`,
+        `Solar flux is ${sfi}, A-index is ${aIndex}, and Kp-index is ${kp}.`,
+        `Sunspot number is ${ssn}, and D-layer absorption is ${dLayer}.`,
+        `Band conditions are as follows: 80 to 40 meters is ${band80_40}, 30 to 20 meters is ${band30_20}.`,
+        `17 to 15 meters is ${band17_15}, and 12 to 10 meters is ${band12_10}.`,
+        `${dayNightNote} 73 from the AI.`
+      ];
 
-    const speakKpIndex = () => {
-      const kpValue = window.currentKp || "Unknown";
-      const utterance = new SpeechSynthesisUtterance(`Kp-Index as of this time is ${kpValue}`);
-      utterance.lang = 'en-US';
-      speechSynthesis.speak(utterance);
-      console.log(getTimestamp(), `Speaking Kp-Index: ${kpValue}`);
-    };
+      // Function to speak messages sequentially
+      const speakSequentially = (msgArray, index = 0) => {
+        if (index >= msgArray.length) return; // Stop when all messages are spoken
+        
+        const utterance = new SpeechSynthesisUtterance(msgArray[index]);
+        utterance.lang = 'en-US';
+        
+        utterance.onend = () => {
+          speakSequentially(msgArray, index + 1); // Speak next part
+        };
+        
+        utterance.onerror = (event) => {
+          console.error(getTimestamp(), `Speech error in part ${index + 1}:`, event.error);
+        };
+        
+        console.log(getTimestamp(), `Speaking part ${index + 1}: ${msgArray[index]}`);
+        speechSynthesis.speak(utterance);
+      };
 
-    const speakDLayer = () => {
-      const dLayerValue = window.currentDLayer || "Unknown";
-      const utterance = new SpeechSynthesisUtterance(`D-Layer Absorption as of this time is ${dLayerValue}`);
-      utterance.lang = 'en-US';
-      speechSynthesis.speak(utterance);
-      console.log(getTimestamp(), `Speaking D-Layer Absorption: ${dLayerValue}`);
+      // Cancel any ongoing speech before starting
+      speechSynthesis.cancel();
+      console.log(getTimestamp(), "Starting HF weather report, 73 from the AI");
+      speakSequentially(messages);
     };
 
     // Event listeners
     document.getElementById('qrz-input').addEventListener('keypress', e => e.key === 'Enter' && searchQRZ());
     document.getElementById('solar-image').addEventListener('click', toggleSolarImageSize);
-    document.getElementById('speak-sfi-button').addEventListener('click', speakSfi);
-    document.getElementById('speak-a-index-button').addEventListener('click', speakAIndex);
-    document.getElementById('speak-sunspot-button').addEventListener('click', speakSunspot);
-    document.getElementById('speak-kp-button').addEventListener('click', speakKpIndex);
-    document.getElementById('speak-d-layer-button').addEventListener('click', speakDLayer);
+    document.getElementById('speak-weather-report-button').addEventListener('click', speakWeatherReport);
 
     // Set intervals for updates
     setInterval(updateClock, 1000);
