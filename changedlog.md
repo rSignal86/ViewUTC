@@ -1,3 +1,9 @@
+## Changelog: V(U)iew(TC) GHv2.6 to GHv2.7
+-Got the AI to add a function as a voice Message to give a general "weatherforcast" as it is now.
+-Got the AI to Remove Say function on SFI, A and K index, SunSpotNumber and D-layer
+-Got the AI to Replace Kp speedometer with a horizontal Kp-bar divided into 9 segments (0-9), with gradient (green-yellow-red).
+
+
 ## Changelog: V(U)iew(TC) GHv2.5.1 to GHv2.6
 # Added
 D-Layer Absorption Impact: Introduced a new factor in the propagation model based on A Index (Low = 0.5 for A ≤ 10, Moderate = 1.0 for A ≤ 25, High = 1.5 for A > 25). Negatively affects daytime conditions for lower bands     (80m-40m, 30m-20m).
